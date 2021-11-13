@@ -1,4 +1,5 @@
 var assert = require('assert');
+const Web3 = require('web3')
 const BSC = require('../src/index')
 const {
     HD_WALLET_12_MNEMONIC,
@@ -50,19 +51,21 @@ describe('Initialize wallet ', () => {
         console.log("accounts, ", accounts)
     })
 
-    // it("Sign message", async () => {
-    //     const signedMessage1 = await bscWallet.signMessage(TESTING_MESSAGE_1, TESTNET)
-    //     console.log("Signed message 1: ", signedMessage1)
-    //     assert(bitcoinMessage.verify(TESTING_MESSAGE_1, bscWallet.address, signedMessage1.signedMessage), "Should verify message 1")
+    it("Sign message", async () => {
+        const web3 = new Web3()
 
-    //     const signedMessage2 = await bscWallet.signMessage(TESTING_MESSAGE_2, TESTNET)
-    //     console.log("Signed message 2: ", signedMessage2)
-    //     assert(bitcoinMessage.verify(TESTING_MESSAGE_2, bscWallet.address, signedMessage2.signedMessage), "Should verify message 2")
+        const signedMessage1 = await bscWallet.signMessage(TESTING_MESSAGE_1)
+        let signedAddress = web3.eth.accounts.recover(TESTING_MESSAGE_1, signedMessage1.signedMessage)
+        assert(signedAddress.toLowerCase() === bscWallet.address.toLowerCase(), "Should verify message 1")
 
-    //     const signedMessage3 = await bscWallet.signMessage(TESTING_MESSAGE_3, TESTNET)
-    //     console.log("Signed message 3: ", signedMessage3)
-    //     assert(bitcoinMessage.verify(TESTING_MESSAGE_3, bscWallet.address, signedMessage3.signedMessage), "Should verify message 3")
-    // })
+        const signedMessage2 = await bscWallet.signMessage(TESTING_MESSAGE_2)
+        signedAddress = web3.eth.accounts.recover(TESTING_MESSAGE_2, signedMessage2.signedMessage)
+        assert(signedAddress.toLowerCase() === bscWallet.address.toLowerCase(), "Should verify message 1")
+
+        const signedMessage3 = await bscWallet.signMessage(TESTING_MESSAGE_3)
+        signedAddress = web3.eth.accounts.recover(TESTING_MESSAGE_3, signedMessage3.signedMessage)
+        assert(signedAddress.toLowerCase() === bscWallet.address.toLowerCase(), "Should verify message 1")
+    })
 
     // it("Get fees", async () => {
     //     const { transactionFees } = await bscWallet.getFee(BSC_TXN_PARAM.connectionUrl);
