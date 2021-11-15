@@ -14,7 +14,13 @@ const {
     TRANSFER_BSC: {
         BSC_AMOUNT,
         BSC_RECEIVER
-    }
+    },
+    TRANSACTION_TYPE: {
+        NATIVE_TRANSFER,
+        TOKEN_TRANSFER,
+        CONTRACT_TRANSACTION,
+        MINT_NEW_TOKEN
+    },
 } = require('./constants')
 
 const BSC_TXN_PARAM = {
@@ -22,7 +28,8 @@ const BSC_TXN_PARAM = {
         data: {
             to: BSC_RECEIVER,
             amount: BSC_AMOUNT,
-        }
+        },
+        txnType: NATIVE_TRANSFER
     },
     connectionUrl: TESTNET
 }
@@ -67,17 +74,17 @@ describe('Initialize wallet ', () => {
         assert(signedAddress.toLowerCase() === bscWallet.address.toLowerCase(), "Should verify message 1")
     })
 
-    // it("Get fees", async () => {
-    //     const { transactionFees } = await bscWallet.getFee(BSC_TXN_PARAM.connectionUrl);
-    //     console.log("transactionFees ", transactionFees)
-    // })
+    it("Get fees", async () => {
+        const { transactionFees } = await bscWallet.getFee(BSC_TXN_PARAM.transaction, BSC_TXN_PARAM.connectionUrl);
+        console.log("transactionFees ", transactionFees)
+    })
 
-    // it("Sign Transaction", async () => {
-    //     const { signedTransaction } = await bscWallet.signTransaction(BSC_TXN_PARAM.transaction, BSC_TXN_PARAM.connectionUrl);
-    //     console.log("signedTransaction ", signedTransaction)
+    it("Sign Transaction", async () => {
+        const { signedTransaction } = await bscWallet.signTransaction(BSC_TXN_PARAM.transaction, BSC_TXN_PARAM.connectionUrl);
+        console.log("signedTransaction ", signedTransaction)
 
-    //     // const sendTransaction = await bscWallet.sendTransaction(signedTransaction, BSC_TXN_PARAM.connectionUrl)
-    //     // console.log("sendTransaction ", sendTransaction)
-    // })
+        const sendTransaction = await bscWallet.sendTransaction(signedTransaction, BSC_TXN_PARAM.connectionUrl)
+        console.log("sendTransaction ", sendTransaction)
+    })
 
 })
