@@ -4,9 +4,7 @@ module.exports = {
     },
     bsc_transaction: {
         NATIVE_TRANSFER: "NATIVE_TRANSFER",
-        TOKEN_TRANSFER: "TOKEN_TRANSFER",
         CONTRACT_TRANSACTION: "CONTRACT_TRANSACTION",
-        MINT_NEW_TOKEN: "MINT_NEW_TOKEN"
     },
     bsc_network: {
         MAINNET: {
