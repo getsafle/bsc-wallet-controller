@@ -393,20 +393,26 @@ class KeyringController extends EventEmitter {
 
         await web3.eth.getChainId().then((e) => chain = e);
 
+        const fees = await this.getFees(rawTx, web3)
+        const nonce = await web3.eth.getTransactionCount(rawTx.from, 'latest');
+
         const privateKey = await this.exportAccount(rawTx.from);
 
         const pkey = Buffer.from(privateKey, 'hex');
 
-        const common = new Common({ chain });
+        // const common = new Common({ chain });
 
         // const tx = FeeMarketEIP1559Transaction.fromTxData(rawTx, { common });
-        const tx = Transaction.fromTxData(rawTx, { common });
+        // const tx = Transaction.fromTxData(rawTx);
 
-        const signedTransaction = tx.sign(pkey);
+        // const signedTransaction = tx.sign(pkey);
+        // console.log("signedTransaction ", signedTransaction)
 
-        const signedTx = bufferToHex(signedTransaction.serialize());
+        // const signedTx = bufferToHex(signedTransaction.serialize());
 
-        return signedTx
+        const signedTransaction = await web3.eth.accounts.signTransaction({ ...rawTx, gas: fees.transactionFees, nonce, gasPrice: await web3.eth.getGasPrice() }, privateKey)
+
+        return signedTransaction.rawTransaction
     }
 
     /**
