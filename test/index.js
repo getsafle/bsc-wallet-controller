@@ -131,12 +131,22 @@ describe('Initialize wallet ', () => {
     it("Get fees", async () => {
         const accounts = await bscKeyring.getAccounts()
         const web3 = new Web3(TESTNET.URL);
+
+        const bridgeBsc = new web3.eth.Contract(
+            bridgeContract.abi,
+            bridgeContract.networks[`${TESTNET.CHAIN_ID}`].address
+        );
+
+        const txData = bridgeBsc.methods.mint(CONTRACT_MINT_PARAM.from, accounts[0].toLowerCase(), CONTRACT_MINT_PARAM.amount, CONTRACT_MINT_PARAM.nonce, CONTRACT_MINT_PARAM.signature);
+        const data = txData.encodeABI();
+
         const tx = {
             from: accounts[0],
-            to: BSC_RECEIVER,
-            value: BSC_AMOUNT
-
+            to: BSC_CONTRACT,
+            value: BSC_AMOUNT_TO_CONTRACT,
+            data
         }
+
         const fees = await bscKeyring.getFees(tx, web3)
         console.log("fees ", fees)
 

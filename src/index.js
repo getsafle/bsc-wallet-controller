@@ -241,12 +241,14 @@ class KeyringController extends EventEmitter {
      */
 
     async signTransaction(bscTx, web3) {
-        const fees = await this.getFees(bscTx, web3)
+        const { from, to, value, data } = bscTx
+        const gas = await web3.eth.estimateGas({ to, from, value, data })
         const nonce = await web3.eth.getTransactionCount(bscTx.from, 'latest');
+        const gasPrice = await web3.eth.getGasPrice()
 
         const privateKey = await this.exportAccount(bscTx.from);
 
-        const signedTransaction = await web3.eth.accounts.signTransaction({ ...bscTx, gas: fees.transactionFees, nonce, gasPrice: await web3.eth.getGasPrice() }, privateKey)
+        const signedTransaction = await web3.eth.accounts.signTransaction({ ...bscTx, gas, nonce, gasPrice }, privateKey)
 
         return signedTransaction.rawTransaction
     }
@@ -479,10 +481,11 @@ class KeyringController extends EventEmitter {
         return { transactionDetails: receipt.transactionHash }
     }
 
-    async getFees(rawTx, web3) {
-        const { from, to, amount, data } = rawTx
-        const estimate = await web3.eth.estimateGas({ to, from, value: amount, data })
-        return { transactionFees: estimate }
+    async getFees(bscTx, web3) {
+        const { from, to, value, data } = bscTx
+        const estimate = await web3.eth.estimateGas({ to, from, value, data })
+        const gasPrice = await web3.eth.getGasPrice();
+        return { transactionFees: estimate * gasPrice }
     }
 }
 
