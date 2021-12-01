@@ -13,7 +13,7 @@ module.exports = {
     },
     TRANSFER_BSC: {
         BSC_RECEIVER: '0xd27189917dd3E4B0e9eB731eCEe358254520FA01', // generated from HD_WALLET_12_MNEMONIC_TEST_OTHER
-        BSC_AMOUNT: 1
+        BSC_AMOUNT: 13
     },
     TOKEN_CONTRACT: '0x2c7ac5a8d7e0b8406f9F47004E8092e5B0755326',
     CONTRACT_TXN: {
@@ -23,11 +23,13 @@ module.exports = {
     BSC_NETWORK: {
         MAINNET: {
             NETWORK: "MAINNET",
-            CHAIN_ID: 56
+            CHAIN_ID: 56,
+            URL: 'https://bsc-dataseed1.binance.org'
         },
         TESTNET: {
             NETWORK: "TESTNET",
-            CHAIN_ID: 97
+            CHAIN_ID: 97,
+            URL: 'https://data-seed-prebsc-1-s1.binance.org:8545'
         }
     }
 }

@@ -1,7 +1,8 @@
 var assert = require('assert');
 const Web3 = require('web3')
 const bridgeContract = require('./contract-json/BridgeBsc.json');
-const BSC = require('../src/index')
+const CryptoJS = require('crypto-js');
+const BSCKeyring = require('../src/index')
 const {
     HD_WALLET_12_MNEMONIC,
     HD_WALLET_12_MNEMONIC_TEST_OTHER,
@@ -20,140 +21,135 @@ const {
         BSC_CONTRACT,
         BSC_AMOUNT_TO_CONTRACT
     },
-    TRANSACTION_TYPE: {
-        NATIVE_TRANSFER,
-        CONTRACT_TRANSACTION
-    },
-} = require('./constants')
-
-const BSC_TXN_PARAM = {
-    transaction: {
-        data: {
-            to: BSC_RECEIVER,
-            amount: BSC_AMOUNT,
-        },
-        txnType: NATIVE_TRANSFER
-    },
-    connectionUrl: TESTNET.NETWORK
-}
-
-const BSC_CONTRACT_TXN_PARAM = {
-    transaction: {
-        data: {
-            to: BSC_CONTRACT,
-            amount: BSC_AMOUNT_TO_CONTRACT,
-            data: null // will be updated in the test case. this will never be null
-        },
-        txnType: CONTRACT_TRANSACTION
-    },
-    connectionUrl: TESTNET.NETWORK
-}
+} = require('./constants');
 
 const CONTRACT_MINT_PARAM = {
-    from: BSC_CONTRACT, 
+    from: BSC_CONTRACT,
     to: '', // this will be the current account 
     amount: 1,
     nonce: 0,
     signature: [72, 0, 101, 0, 108, 0, 108, 0, 111, 0, 220, 122]
 }
 
+const opts = {
+    encryptor: {
+        encrypt(pass, object) {
+            const ciphertext = CryptoJS.AES.encrypt(JSON.stringify(object), pass).toString();
+
+            return ciphertext;
+        },
+        decrypt(pass, encryptedString) {
+            const bytes = CryptoJS.AES.decrypt(encryptedString, pass);
+            const decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+
+            return decryptedData;
+        },
+    },
+}
+
+const opts_empty = {}
+
+const PASSWORD = "random_password"
+
+/**
+ * Transaction object type
+ * {    from: from address,
+        to: to address,
+        value: amount (in wei),
+        data: hex string}
+ */
+
 describe('Initialize wallet ', () => {
-    const bscWallet = new BSC(HD_WALLET_12_MNEMONIC)
+    const bscKeyring = new BSCKeyring(opts)
 
-    it("Should have correct mnemonic", () => {
-        assert.equal(bscWallet.mnemonic, HD_WALLET_12_MNEMONIC, "Incorrect hd wallet")
+    it("Create new vault and keychain", async () => {
+        const res = await bscKeyring.createNewVaultAndKeychain(PASSWORD)
+        console.log("res ", res)
     })
 
-    it("Should generateWallet ", async () => {
-        assert(bscWallet.address === null)
-        const wallet = await bscWallet.generateWallet()
-        console.log("wallet, ", wallet)
-        assert(bscWallet.address !== null)
+    it("Create new vault and restore", async () => {
+        const res = await bscKeyring.createNewVaultAndRestore(PASSWORD, HD_WALLET_12_MNEMONIC)
+        assert(bscKeyring.keyrings[0].mnemonic === HD_WALLET_12_MNEMONIC, "Wrong mnemonic")
     })
 
-    it("Should get privateKey ", async () => {
-        const privateKey = await bscWallet.exportPrivateKey(TESTNET)
-        console.log("privateKey, ", privateKey)
+    it("Export account (privateKey)", async () => {
+        const res = await bscKeyring.getAccounts()
+        let account = res[0]
+        const accRes = await bscKeyring.exportAccount(account)
+        console.log("accRes ", accRes, Buffer.from(accRes, 'hex'))
     })
 
-    it("Should get account ", async () => {
-        const accounts = await bscWallet.getAccounts()
-        console.log("accounts, ", accounts)
+    it("Get accounts", async () => {
+        const acc = await bscKeyring.getAccounts()
+        console.log("acc ", acc)
     })
 
-    it("Sign message", async () => {
-        const web3 = new Web3()
+    it("Sign transaction - transfer BSC", async () => {
+        const accounts = await bscKeyring.getAccounts()
+        const web3 = new Web3(TESTNET.URL);
 
-        const signedMessage1 = await bscWallet.signMessage(TESTING_MESSAGE_1)
-        let signedAddress = web3.eth.accounts.recover(TESTING_MESSAGE_1, signedMessage1.signedMessage)
-        assert(signedAddress.toLowerCase() === bscWallet.address.toLowerCase(), "Should verify message 1")
+        const tx = {
+            from: accounts[0],
+            to: BSC_RECEIVER,
+            value: BSC_AMOUNT
+        }
 
-        const signedMessage2 = await bscWallet.signMessage(TESTING_MESSAGE_2)
-        signedAddress = web3.eth.accounts.recover(TESTING_MESSAGE_2, signedMessage2.signedMessage)
-        assert(signedAddress.toLowerCase() === bscWallet.address.toLowerCase(), "Should verify message 1")
+        const signedTxn = await bscKeyring.signTransaction(tx, web3)
+        console.log("signedTxn ", signedTxn)
 
-        const signedMessage3 = await bscWallet.signMessage(TESTING_MESSAGE_3)
-        signedAddress = web3.eth.accounts.recover(TESTING_MESSAGE_3, signedMessage3.signedMessage)
-        assert(signedAddress.toLowerCase() === bscWallet.address.toLowerCase(), "Should verify message 1")
-    })
-
-    it("Get fees - transfer BSC", async () => {
-        const { transactionFees } = await bscWallet.getFee(BSC_TXN_PARAM.transaction, BSC_TXN_PARAM.connectionUrl);
-        console.log("transactionFees ", transactionFees)
-    })
-
-    it("Get fees - mint token in a demo token contract", async () => {
-        const url = BSC_CONTRACT_TXN_PARAM.connectionUrl === TESTNET.NETWORK ? 
-        { url: 'https://data-seed-prebsc-1-s1.binance.org:8545', chainId: TESTNET.CHAIN_ID } :
-        { url: `https://bsc-dataseed1.binance.org`, chainId: MAINNET.CHAIN_ID }
-
-        const web3 = new Web3(url.url);
-        const bridgeBsc = new web3.eth.Contract(
-            bridgeContract.abi,
-            bridgeContract.networks[`${url.chainId}`].address
-        );
-
-        const tx = bridgeBsc.methods.mint(CONTRACT_MINT_PARAM.from, bscWallet.address.toLowerCase(), CONTRACT_MINT_PARAM.amount, CONTRACT_MINT_PARAM.nonce, CONTRACT_MINT_PARAM.signature);
-        const data = tx.encodeABI();
-        BSC_CONTRACT_TXN_PARAM.transaction.data.data = data
-
-        const { transactionFees } = await bscWallet.getFee(BSC_CONTRACT_TXN_PARAM.transaction, BSC_CONTRACT_TXN_PARAM.connectionUrl);
-        console.log("transactionFees ", transactionFees)
-    })
-
-    it("Sign Transaction - transfer BSC", async () => {
-        const { signedTransaction } = await bscWallet.signTransaction(BSC_TXN_PARAM.transaction, BSC_TXN_PARAM.connectionUrl);
-        console.log("signedTransaction ", signedTransaction)
-
-        // const sendTransaction = await bscWallet.sendTransaction(signedTransaction, BSC_TXN_PARAM.connectionUrl)
-        // console.log("sendTransaction ", sendTransaction)
+        // const sentTxn = await bscKeyring.sendTransaction(signedTxn, web3)
+        // console.log("sentTxn ", sentTxn)
     })
 
     it("Sign Transaction - mint token in a demo token contract", async () => {
-        const url = BSC_CONTRACT_TXN_PARAM.connectionUrl === TESTNET.NETWORK ? 
-        { url: 'https://data-seed-prebsc-1-s1.binance.org:8545', chainId: TESTNET.CHAIN_ID } :
-        { url: `https://bsc-dataseed1.binance.org`, chainId: MAINNET.CHAIN_ID }
 
-        const web3 = new Web3(url.url);
+        const accounts = await bscKeyring.getAccounts()
+        const web3 = new Web3(TESTNET.URL);
+
         const bridgeBsc = new web3.eth.Contract(
             bridgeContract.abi,
-            bridgeContract.networks[`${url.chainId}`].address
+            bridgeContract.networks[`${TESTNET.CHAIN_ID}`].address
         );
 
-        const tx = bridgeBsc.methods.mint(CONTRACT_MINT_PARAM.from, bscWallet.address.toLowerCase(), CONTRACT_MINT_PARAM.amount, CONTRACT_MINT_PARAM.nonce, CONTRACT_MINT_PARAM.signature);
-        const data = tx.encodeABI();
-        BSC_CONTRACT_TXN_PARAM.transaction.data.data = data
+        const txData = bridgeBsc.methods.mint(CONTRACT_MINT_PARAM.from, accounts[0].toLowerCase(), CONTRACT_MINT_PARAM.amount, CONTRACT_MINT_PARAM.nonce, CONTRACT_MINT_PARAM.signature);
+        const data = txData.encodeABI();
 
-        const { signedTransaction } = await bscWallet.signTransaction(BSC_CONTRACT_TXN_PARAM.transaction, BSC_CONTRACT_TXN_PARAM.connectionUrl);
-        console.log("signedTransaction ", signedTransaction)
+        const tx = {
+            from: accounts[0],
+            to: BSC_CONTRACT,
+            value: BSC_AMOUNT_TO_CONTRACT,
+            data
+        }
 
-        // const sendTransaction = await bscWallet.sendTransaction(signedTransaction, BSC_CONTRACT_TXN_PARAM.connectionUrl)
-        // console.log("sendTransaction ", sendTransaction)
+        const signedTxn = await bscKeyring.signTransaction(tx, web3);
+        console.log("signedTxn ", signedTxn)
+
+        // const sentTxn = await bscKeyring.sendTransaction(signedTxn, web3)
+        // console.log("sentTxn ", sentTxn)
     })
 
-    it("Get balance ", async () => {
-        const { balance } = await bscWallet.getBalance(TESTNET.NETWORK);
-        console.log("balance ", balance)
+    it("Get fees", async () => {
+        const accounts = await bscKeyring.getAccounts()
+        const web3 = new Web3(TESTNET.URL);
+
+        const bridgeBsc = new web3.eth.Contract(
+            bridgeContract.abi,
+            bridgeContract.networks[`${TESTNET.CHAIN_ID}`].address
+        );
+
+        const txData = bridgeBsc.methods.mint(CONTRACT_MINT_PARAM.from, accounts[0].toLowerCase(), CONTRACT_MINT_PARAM.amount, CONTRACT_MINT_PARAM.nonce, CONTRACT_MINT_PARAM.signature);
+        const data = txData.encodeABI();
+
+        const tx = {
+            from: accounts[0],
+            to: BSC_CONTRACT,
+            value: BSC_AMOUNT_TO_CONTRACT,
+            data
+        }
+
+        const fees = await bscKeyring.getFees(tx, web3)
+        console.log("fees ", fees)
+
     })
 
 })
