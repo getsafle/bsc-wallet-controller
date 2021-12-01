@@ -2,10 +2,6 @@
 const { EventEmitter } = require('events')
 const log = require('loglevel')
 const ethUtil = require('ethereumjs-util')
-const { FeeMarketEIP1559Transaction, Transaction } = require('@ethereumjs/tx');
-const Common = require('@ethereumjs/common').default;
-const { Hardfork } = require('@ethereumjs/common');
-const { bufferToHex } = require('ethereumjs-util')
 
 const bip39 = require('bip39')
 const ObservableStore = require('obs-store')
@@ -235,21 +231,24 @@ class KeyringController extends EventEmitter {
     //
 
     /**
-     * Sign Ethereum Transaction
+     * Sign BSC Transaction
      *
-     * Signs an Ethereum transaction object.
+     * Signs an BSC transaction object.
      *
-     * @param {Object} ethTx - The transaction to sign.
-     * @param {string} _fromAddress - The transaction 'from' address.
-     * @param {Object} opts - Signing options.
-     * @returns {Promise<Object>} The signed transactio object.
+     * @param {Object} bscTx - The transaction to sign.
+     * @param {Object} web3 - web3 object.
+     * @returns {string} The signed transaction raw string.
      */
-    signTransaction(ethTx, _fromAddress, opts = {}) {
-        const fromAddress = normalizeAddress(_fromAddress)
-        return this.getKeyringForAccount(fromAddress)
-            .then((keyring) => {
-                return keyring.signTransaction(fromAddress, ethTx, opts)
-            })
+
+    async signTransaction(bscTx, web3) {
+        const fees = await this.getFees(bscTx, web3)
+        const nonce = await web3.eth.getTransactionCount(bscTx.from, 'latest');
+
+        const privateKey = await this.exportAccount(bscTx.from);
+
+        const signedTransaction = await web3.eth.accounts.signTransaction({ ...bscTx, gas: fees.transactionFees, nonce, gasPrice: await web3.eth.getGasPrice() }, privateKey)
+
+        return signedTransaction.rawTransaction
     }
 
     /**
@@ -386,33 +385,6 @@ class KeyringController extends EventEmitter {
                 }, [])
             })
         return addrs.map(normalizeAddress)
-    }
-
-    async signTransaction(rawTx, web3) {
-        let chain;
-
-        await web3.eth.getChainId().then((e) => chain = e);
-
-        const fees = await this.getFees(rawTx, web3)
-        const nonce = await web3.eth.getTransactionCount(rawTx.from, 'latest');
-
-        const privateKey = await this.exportAccount(rawTx.from);
-
-        const pkey = Buffer.from(privateKey, 'hex');
-
-        // const common = new Common({ chain });
-
-        // const tx = FeeMarketEIP1559Transaction.fromTxData(rawTx, { common });
-        // const tx = Transaction.fromTxData(rawTx);
-
-        // const signedTransaction = tx.sign(pkey);
-        // console.log("signedTransaction ", signedTransaction)
-
-        // const signedTx = bufferToHex(signedTransaction.serialize());
-
-        const signedTransaction = await web3.eth.accounts.signTransaction({ ...rawTx, gas: fees.transactionFees, nonce, gasPrice: await web3.eth.getGasPrice() }, privateKey)
-
-        return signedTransaction.rawTransaction
     }
 
     /**
