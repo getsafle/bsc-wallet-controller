@@ -2,6 +2,7 @@
 const { EventEmitter } = require('events')
 const log = require('loglevel')
 const ethUtil = require('ethereumjs-util')
+const Tx = require('ethereumjs-tx');
 
 const bip39 = require('bip39')
 const ObservableStore = require('obs-store')
@@ -240,17 +241,16 @@ class KeyringController extends EventEmitter {
      * @returns {string} The signed transaction raw string.
      */
 
-    async signTransaction(bscTx, web3) {
-        const { from, to, value, data } = bscTx
-        const gas = await web3.eth.estimateGas({ to, from, value, data })
-        const nonce = await web3.eth.getTransactionCount(bscTx.from, 'latest');
-        const gasPrice = await web3.eth.getGasPrice()
+    async signTransaction(bscTx, privateKey) { 
+        const tx = new Tx(bscTx);
 
-        const privateKey = await this.exportAccount(bscTx.from);
+        const pkey = Buffer.from(privateKey, 'hex');
 
-        const signedTransaction = await web3.eth.accounts.signTransaction({ ...bscTx, gas, nonce, gasPrice }, privateKey)
+        tx.sign(pkey);
 
-        return signedTransaction.rawTransaction
+        const signedTx = `0x${tx.serialize().toString('hex')}`;
+
+        return signedTx;
     }
 
     /**
