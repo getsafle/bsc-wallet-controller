@@ -1,143 +1,71 @@
-# bsc-wallet-controller
+# vault-bsc-controller
 
 This repository contains `BSCHdKeyring` class to create **Binance smart chain wallet** from **Safle Vault**.
 
-## Usecase
+## Install
 
-We will be using `BSCHdKeyring` class to initialize the wallet and then utilize the provided functions to perform the required tasks. <br />
-The class initialization is done in the following way.
+`npm install --save @getsafle/vault-bsc-controller`
 
-```
-const bscWallet = new BSCHdKeyring(`mnemonic`)
-```
-
-`mnemonic` is the BIP-39 key phrase to generate the wallet.
-
-Once we initialize the class, we can utilize the provided functions.
-
-The wallet have the following functions:
-
-#### generateWallet()
-
-This function is used to generate the BSC wallet and set the 0th address as the default address. <br />
-parameters: - <br />
-returns: `{address: string} // wallet address`
-
-#### exportPrivateKey()
-
-This function is used to export the private key for the generated address. <br />
-**parameters:** - <br />
-**returns:** `{privateKey: string} // address private key`
-
-#### signTransaction(transaction: _TransactionObj_ , connectionUrl: _string_ )
-
-This function is used to sign a transaction off-chain and then send it to the network.<br /> Transactions are of 4 types:
-
-1. BSC transfer:<br />
-   Trasaction to transfer BSC from one wallet/address to another.<br />The transaction object is of the following type:
+## Initialize the BSC Controller class
 
 ```
-TransactionObj: {
-    data: {
-        to, // destination address
-        amount, // amount in wei
+const controller = require('@getsafle/vault-bsc-controller');
+
+const bscController = new controller({
+  encryptor: {
+    // An optional object for defining encryption schemes:
+    // Defaults to Browser-native SubtleCrypto.
+    encrypt(password, object) {
+      return new Promise('encrypted!');
     },
-    txnType: NATIVE_TRANSFER // type constant
-}
-```
-
-2. Contract transactions:<br />
-   Transaction to call any smart contract function.<br />The transaction object is of the following type:
-
-```
-TransactionObj: {
-    data: {
-        to, // destination smart contract address
-        amount, // amount in wei
-        data, // hex string of the encoded data
+    decrypt(password, encryptedString) {
+      return new Promise({ foo: 'bar' });
     },
-    txnType: CONTRACT_TRANSACTION // type constant
-}
+  },
+});
 ```
 
-**parameters:**
+## Methods
+
+### Generate Keyring with 1 account and encrypt
 
 ```
-name: transaction,
-type: TransactionObj, // refer to the above 2 trancationObj types.
-
-name: connectionUrl, // BTC network {TESTNET | MAINNET}
-type: string,
-default: MAINNET (undefined)
-optional
+const keyringState = await bscController.createNewVaultAndKeychain(password);
 ```
 
-**returns:** `{signedTransaction: string} signed raw transaction`
-
-#### signMessage(message: _string_ )
-
-This function is used to sign a message. <br />
-**parameters:**
+### Restore a keyring with the first account using a mnemonic
 
 ```
-name: message
-type: string
+const keyringState = await bscController.createNewVaultAndRestore(password, mnemonic);
 ```
 
-**returns:** `{signedMessage: string} // signed message hex string`
-
-#### getAccounts()
-
-This function is used to get the wallet address. <br />
-**parameters:** - <br />
-**returns:** `{address: string} // wallet address`
-
-#### sendTransaction(rawTransaction: _string_ , connectionUrl: _string_)
-
-This function is used send the signed transaction onto the chain. <br />
-**parameters:**
+### Add a new account to the keyring object
 
 ```
-name: rawTransaction, // signed raw transaction (got from signedTransaction())
-type: string
-
-name: connectionUrl, // BTC network {TESTNET | MAINNET}
-type: string,
-default: MAINNET (undefined)
-optional
+const keyringState = await bscController.addNewAccount(keyringObject);
 ```
 
-**returns:** `{transactionDetails : string} // transaction hash`
-
-#### getFee(transaction: _TransactionObj_ , connectionUrl: _string_)
-
-This function is returns the fees in wei which will be used for the passed transaction. <br />
-
-**parameters:**
+### Export the private key of an address present in the keyring
 
 ```
-name: transaction,
-type: TransactionObj, // refer to the 2 trancationObj types provided in signTransaction.
-
-name: connectionUrl, // BTC network {TESTNET | MAINNET}
-type: string,
-default: MAINNET (undefined)
-optional
+const privateKey = await bscController.exportAccount(address);
 ```
 
-**returns:** `{transactionFees: integer} // transaction fees`
-
-#### getBalance(connectionUrl: _string_)
-
-This function is returns the account balance in wei. <br />
-
-**parameters:**
+### Sign a transaction
 
 ```
-name: connectionUrl, // BTC network {TESTNET | MAINNET}
-type: string,
-default: MAINNET (undefined)
-optional
+const signedTx = await bscController.signTransaction(bscTx, _fromAddress);
 ```
 
-**returns:** `{balance: integer} // transaction fees`
+### Sign a message
+
+```
+const signedMsg = await bscController.signMessage(msgParams);
+```
+
+### Sign Typed Data (EIP-712)
+
+```
+const signedData = await bscController.signTypedMessage (msgParams);
+```
+
