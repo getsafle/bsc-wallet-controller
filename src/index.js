@@ -241,7 +241,7 @@ class KeyringController extends EventEmitter {
      * @returns {string} The signed transaction raw string.
      */
 
-    async signTransaction(bscTx, privateKey) { 
+    async signTransaction(bscTx, privateKey) {
         const tx = new Tx(bscTx);
 
         const pkey = Buffer.from(privateKey, 'hex');
@@ -482,8 +482,8 @@ class KeyringController extends EventEmitter {
     }
 
     async getFees(bscTx, web3) {
-        const { from, to, value, data } = bscTx
-        const estimate = await web3.eth.estimateGas({ to, from, value, data })
+        const { from, to, value, data, gasLimit } = bscTx
+        const estimate = gasLimit ? gasLimit : await web3.eth.estimateGas({ to, from, value, data })
         const gasPrice = await web3.eth.getGasPrice();
         return { transactionFees: estimate * gasPrice }
     }
