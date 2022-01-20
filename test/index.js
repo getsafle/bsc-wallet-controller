@@ -9,6 +9,11 @@ const {
     TESTING_MESSAGE_1,
     TESTING_MESSAGE_2,
     TESTING_MESSAGE_3,
+    EXTERNAL_ACCOUNT_PRIVATE_KEY,
+    EXTERNAL_ACCOUNT_ADDRESS,
+    EXTERNAL_ACCOUNT_WRONG_PRIVATE_KEY_1,
+    EXTERNAL_ACCOUNT_WRONG_PRIVATE_KEY_2,
+    EXTERNAL_ACCOUNT_WRONG_PRIVATE_KEY_3,
     BSC_NETWORK: {
         TESTNET,
         MAINNET
@@ -115,7 +120,11 @@ describe('Initialize wallet ', () => {
         }
         const fees = await bscKeyring.getFees(tx, web3)
         console.log(" with manual gasLimit ", fees)
-
     })
 
+    it("Should import correct account ", async () => {
+        const address = await bscKeyring.importWallet(EXTERNAL_ACCOUNT_PRIVATE_KEY)
+        assert(address.toLowerCase() === EXTERNAL_ACCOUNT_ADDRESS.toLowerCase(), "Wrong address")
+        assert(bscKeyring.importedWallets.length === 1, "Should have 1 imported wallet")
+    })
 })
