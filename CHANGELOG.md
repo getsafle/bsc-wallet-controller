@@ -10,3 +10,9 @@
 
 - Update package name to vault-bsc-controller
 - Added gasLimit check which calculating the gasFees of a transaction.
+
+### 1.0.1 (2022-01-21)
+
+##### Implement import wallet functionality
+
+- Added importWallet() to import account using privateKey.
