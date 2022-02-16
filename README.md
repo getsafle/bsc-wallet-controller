@@ -66,6 +66,11 @@ const signedMsg = await bscController.signMessage(msgParams);
 ### Sign Typed Data (EIP-712)
 
 ```
-const signedData = await bscController.signTypedMessage (msgParams);
+const signedData = await bscController.signTypedMessage(msgParams);
 ```
 
+### Get balance
+
+```
+const balance = await getBalance(address, web3);
+```

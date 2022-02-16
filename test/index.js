@@ -2,7 +2,7 @@ var assert = require('assert');
 const Web3 = require('web3')
 const bridgeContract = require('./contract-json/BridgeBsc.json');
 const CryptoJS = require('crypto-js');
-const BSCKeyring = require('../src/index')
+const { KeyringController: BSCKeyring, getBalance } = require('../src/index')
 const {
     HD_WALLET_12_MNEMONIC,
     HD_WALLET_12_MNEMONIC_TEST_OTHER,
@@ -126,5 +126,12 @@ describe('Initialize wallet ', () => {
         const address = await bscKeyring.importWallet(EXTERNAL_ACCOUNT_PRIVATE_KEY)
         assert(address.toLowerCase() === EXTERNAL_ACCOUNT_ADDRESS.toLowerCase(), "Wrong address")
         assert(bscKeyring.importedWallets.length === 1, "Should have 1 imported wallet")
+    })
+
+    it("Get address balance", async () => {
+        const accounts = await bscKeyring.getAccounts()
+        const web3 = new Web3(TESTNET.URL);
+        const balance = await getBalance(accounts[0], web3)
+        console.log(" get balance ", balance, accounts)
     })
 })
