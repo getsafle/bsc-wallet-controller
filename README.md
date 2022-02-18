@@ -9,9 +9,9 @@ This repository contains `BSCHdKeyring` class to create **Binance smart chain wa
 ## Initialize the BSC Controller class
 
 ```
-const controller = require('@getsafle/vault-bsc-controller');
+const { KeyringController, getBalance } = require('@getsafle/vault-bsc-controller');
 
-const bscController = new controller({
+const bscController = new KeyringController({
   encryptor: {
     // An optional object for defining encryption schemes:
     // Defaults to Browser-native SubtleCrypto.
@@ -66,6 +66,11 @@ const signedMsg = await bscController.signMessage(msgParams);
 ### Sign Typed Data (EIP-712)
 
 ```
-const signedData = await bscController.signTypedMessage (msgParams);
+const signedData = await bscController.signTypedMessage(msgParams);
 ```
 
+### Get balance
+
+```
+const balance = await getBalance(address, web3);
+```
