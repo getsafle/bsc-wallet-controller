@@ -63,6 +63,12 @@ const signedTx = await bscController.signTransaction(bscTx, _fromAddress);
 const signedMsg = await bscController.signMessage(msgParams);
 ```
 
+### Sign a message
+
+```
+const signedObj = await bscController.sign(msgParams, pvtKey, web3Obj);
+```
+
 ### Sign Typed Data (EIP-712)
 
 ```
