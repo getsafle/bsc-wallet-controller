@@ -32,3 +32,8 @@
 ### 1.2.1 (2023-06-21)
 
 - update import wallet to accept private key with or without '0x’ prefixed
+
+
+### 1.2.2 (2023-07-05)
+
+- Adding badges to readme.md
