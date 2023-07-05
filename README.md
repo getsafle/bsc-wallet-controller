@@ -1,8 +1,22 @@
-# vault-bsc-controller
+# vault-bsc-controller<code><a href="https://www.docker.com/" target="_blank"><img height="50" src="https://dex-bin.bnbstatic.com/static/images/logo_BNB_Chain.svg"></a></code>
 
-This repository contains `BSCHdKeyring` class to create **Binance smart chain wallet** from **Safle Vault**.
+<img alt="Static Badge" src="https://img.shields.io/badge/version-v1.2.1-blue">  <img alt="Static Badge" src="https://img.shields.io/badge/nvm-v6.0.6-red">  <img alt="Static Badge" src="https://img.shields.io/badge/License-MIT-green">   [![Discussions][discussions-badge]][discussions-link]
+ <img alt="Static Badge" src="https://img.shields.io/badge/BSC_controller-documentation-purple">   
 
-## Install
+A module written in javascript for managing various keyrings of BSC accounts, encrypting them, and using them. This repository contains `BSCHdKeyring` class to create **Binance smart chain wallet** from **Safle Vault**
+
+- [Installation](#installation)
+- [Initialize the BSC Controller class](#initialize-the-bsc-controller-class)
+- [Methods](#methods)
+  - [Generate Keyring with 1 account and encrypt](#generate-keyring-with-1-account-and-encrypt)
+  - [Restore a keyring with the first account using a mnemonic](#restore-a-keyring-with-the-first-account-using-a-mnemonic)
+  - [Add a new account to the keyring object](#add-a-new-account-to-the-keyring-object)
+  - [Export the private key of an address present in the keyring](#export-the-private-key-of-an-address-present-in-the-keyring)
+  - [Sign a transaction](#sign-a-transaction)
+  - [Sign a message](#sign-a-message)
+  - [Get balance](#get-balance)
+
+## Installation
 
 `npm install --save @getsafle/vault-bsc-controller`
 
@@ -80,3 +94,5 @@ const signedData = await bscController.signTypedMessage(msgParams);
 ```
 const balance = await getBalance(address, web3);
 ```
+[discussions-badge]: https://img.shields.io/badge/Code_Quality-passing-rgba
+[discussions-link]: https://github.com/getsafle/vault-bsc-controller/actions
