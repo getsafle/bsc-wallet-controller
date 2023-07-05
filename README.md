@@ -1,6 +1,6 @@
 # vault-bsc-controller<code><a href="https://www.docker.com/" target="_blank"><img height="50" src="https://dex-bin.bnbstatic.com/static/images/logo_BNB_Chain.svg"></a></code>
 
-<img alt="Static Badge" src="https://img.shields.io/badge/version-v1.2.2-blue">  <img alt="Static Badge" src="https://img.shields.io/badge/nvm-v6.0.6-red">  <img alt="Static Badge" src="https://img.shields.io/badge/License-MIT-green">   [![Discussions][discussions-badge]][discussions-link]
+[![npm version](https://badge.fury.io/js/@getsafle%2Fvault-bsc-controller.svg)](https://badge.fury.io/js/@getsafle%2Fvault-bsc-controller)  <img alt="Static Badge" src="https://img.shields.io/badge/License-MIT-green">   [![Discussions][discussions-badge]][discussions-link]
  <img alt="Static Badge" src="https://img.shields.io/badge/BSC_controller-documentation-purple">   
 
 A Module written in javascript for managing various keyrings of BSCereum accounts, encrypting them, and using them. This repository contains `BSCHdKeyring` class to create **Binance smart chain wallet** from **Safle Vault**.
