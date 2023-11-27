@@ -37,3 +37,7 @@
 ### 1.2.2 (2023-07-05)
 
 - Adding badges to readme.md
+
+### 1.2.3 (2023-11-27)
+
+- Updated node version to 18x
