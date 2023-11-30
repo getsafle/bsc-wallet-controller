@@ -524,7 +524,7 @@ class KeyringController extends EventEmitter {
         const { from, to, value, data } = bscTx
         const gasLimit = await web3.eth.estimateGas({ to, from, value, data })
         const gasPrice = await web3.eth.getGasPrice();
-        return { gasLimit: gasLimit, gasPrice: gasPrice}
+        return { gasLimit: gasLimit, gasPrice: parseInt(gasPrice)}
     }
 }
 
