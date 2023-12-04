@@ -37,3 +37,12 @@
 ### 1.2.2 (2023-07-05)
 
 - Adding badges to readme.md
+
+### 1.2.3 (2023-11-27)
+
+- Updated node version to 18x
+
+### 1.2.4 (2023-11-30)
+
+- Add gas limit and gas estimation in getFees()
+- updated tests for getFees() update
