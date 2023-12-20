@@ -51,3 +51,4 @@
 
 - Replaced deprecated ethereumjs-tx lib to @ethereumjs/tx and @ethereumjs/common for transaction signing.
 - Changed license to MIT.
+- Removed 'signTransaction' dependency from 'getFees' method.

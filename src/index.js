@@ -20,7 +20,7 @@ const keyringTypes = [
     SimpleKeyring,
     HdKeyring,
 ]
-let chainId;
+
 
 class KeyringController extends EventEmitter {
 
@@ -269,6 +269,8 @@ class KeyringController extends EventEmitter {
     async signTransaction(bscTx, privateKey) {
 
         const pkey = Buffer.from(privateKey, 'hex');
+
+        const chainId = bscTx.chainId;
         
         const common = Common.custom({ chainId: chainId }, { hardfork: Hardfork.Istanbul })
 
@@ -284,6 +286,7 @@ class KeyringController extends EventEmitter {
 
     /**
      * Sign Transaction or Message to get v,r,s
+     *
      * Signs a transaction object.
      *
      * @param {Object} rawTx - The transaction or message to sign.
@@ -531,7 +534,6 @@ class KeyringController extends EventEmitter {
     async getFees(bscTx, web3) {
         const { from, to, value, data } = bscTx
         const gasLimit = await web3.eth.estimateGas({ to, from, value, data })
-        chainId = await web3.eth.getChainId();
         const gasPrice = parseInt(await web3.eth.getGasPrice());
         const fees = {
             "slow":{

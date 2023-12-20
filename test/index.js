@@ -163,6 +163,7 @@ describe('Initialize wallet ', () => {
             gasPrice: getFeeEstimate.fees.slow.gasPrice,
             nonce: defaultNonce,
             data: '0x',
+            chainId: TESTNET.CHAIN_ID
         };
 
         const privateKey = await bscKeyring.exportAccount(accounts[0])
