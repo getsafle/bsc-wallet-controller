@@ -46,3 +46,9 @@
 
 - Add gas limit and gas estimation in getFees()
 - updated tests for getFees() update
+
+### 1.2.5 (2023-12-14)
+
+- Replaced deprecated ethereumjs-tx lib to @ethereumjs/tx and @ethereumjs/common for transaction signing.
+- Changed license to MIT.
+- Removed 'signTransaction' dependency from 'getFees' method.
